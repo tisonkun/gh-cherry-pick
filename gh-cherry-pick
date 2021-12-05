@@ -210,11 +210,11 @@ function make-a-pr() {
     numandtitle=$(printf '%s\n' "${SUBJECTS[@]}")
 
     # prepare pr title
-    echo "Automated cherry pick of ${numandtitle}" > "${TMP}/pr-title"
+    echo -e "Automated cherry pick of ${numandtitle}" > "${TMP}/pr-title"
     if [[ "${EDIT_TITLE}" =~ ^[1]$ ]]; then
         "${EDITOR:-vi}" "${TMP}/pr-title"
     elif [[ -n "${EDIT_TITLE}" ]]; then
-        echo "${EDIT_TITLE}" > "${TMP}/pr-title"
+        echo -e "${EDIT_TITLE}" > "${TMP}/pr-title"
     fi
     prtitle=$(cat "${TMP}/pr-title")
 
@@ -226,7 +226,7 @@ EOF
     if [[ "${EDIT_BODY}" =~ ^[1]$ ]]; then
         "${EDITOR:-vi}" "${TMP}/pr-body"
     elif [[ -n "${EDIT_BODY}" ]]; then
-        echo "${EDIT_BODY}" > "${TMP}/pr-body"
+        echo -e "${EDIT_BODY}" > "${TMP}/pr-body"
     fi
     prbody=$(cat "${TMP}/pr-body")
 
