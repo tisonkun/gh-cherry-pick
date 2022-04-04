@@ -12,9 +12,11 @@ gh extension install tisonkun/gh-cherry-pick
 * (optional) `UPSTREAM_REMOTE` (default: 'upstream')
 * (optional) `FORK_REMOTE` (default: 'origin')
 * (optional) `GIT_AM_OPTS` (default: '-3'): options when running 'git am'.
-* (optional) `ALLY`: set to non-empty value to answer all confirmation as 'y'.
-* (optional) `EDIT_BODY`: set to 1 to edit, to other value to overwrite PR body.
-* (optional) `EDIT_TITLE`: set to 1 to edit, to other value to overwrite PR title.
+* (optional) `SKIP_CONFIRM`: set to 1 to skip all interactive confirmations.
+* (optional) `OVERWRITE_PR_TITLE`: set to over the PR title with the given value.
+* (optional) `OVERWRITE_PR_BODY`: set to over the PR body with the given value.
+* (optional) `EDIT_PR_TITLE`: set to 1 to edit the PR title. 
+* (optional) `EDIT_PR_BODY`: set to 1 to edit the PR body.
 
 ## Usage
 

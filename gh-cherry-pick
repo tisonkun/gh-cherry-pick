@@ -40,10 +40,12 @@ cd "${REPO_ROOT}"
 STARTINGBRANCH=$(git symbolic-ref --short HEAD)
 REBASEMAGIC="${REPO_ROOT}/.git/rebase-apply"
 DRY_RUN=${DRY_RUN:-""}
-EDIT_BODY=${EDIT_BODY:-""}
-EDIT_TITLE=${EDIT_TITLE:-""}
+OVERWRITE_PR_TITLE=${OVERWRITE_PR_TITLE:-""}
+OVERWRITE_PR_BODY=${OVERWRITE_PR_BODY:-""}
+EDIT_PR_TITLE=${EDIT_PR_TITLE:-""}
+EDIT_PR_BODY=${EDIT_PR_BODY:-""}
 GIT_AM_OPTS=${GIT_AM_OPTS:-"-3"}
-ALLY=${ALLY:-""}
+SKIP_CONFIRM=${SKIP_CONFIRM:-""}
 UPSTREAM_REMOTE=${UPSTREAM_REMOTE:-upstream}
 FORK_REMOTE=${FORK_REMOTE:-origin}
 MAIN_REPO_ORG=${MAIN_REPO_ORG:-$(git remote get-url "$UPSTREAM_REMOTE" | awk '{gsub(/http[s]:\/\/|git@/,"")}1' | awk -F'[@:./]' 'NR==1{print $3}')}
@@ -71,9 +73,11 @@ if [[ "$#" -lt 2 ]]; then
     echo "  to override the default remote names to what you have locally."
     echo
     echo "  Set GIT_AM_OPTS (default: '-3') to overwrite options when running 'git am'."
-    echo "  Set ALLY=1 to answer all confirmation as 'y'."
-    echo "  Set EDIT_BODY=1 to edit, other value to overwrite PR body."
-    echo "  Set EDIT_TITLE=1 to edit, other value to overwrite PR title."
+    echo "  Set SKIP_CONFIRM=1 to skip all interactive confirmations."
+    echo "  Set OVERWRITE_PR_TITLE to over the PR title with the given value."
+    echo "  Set OVERWRITE_PR_BODY to over the PR body with the given value."
+    echo "  Set EDIT_PR_TITLE=1 to edit the PR title."
+    echo "  Set EDIT_PR_BODY=1 to edit the PR body."
     exit 2
 fi
 
@@ -211,10 +215,11 @@ function make-a-pr() {
 
     # prepare pr title
     echo -e "Automated cherry pick of ${numandtitle}" > "${TMP}/pr-title"
-    if [[ "${EDIT_TITLE}" =~ ^[1]$ ]]; then
+    if [[ -z "${OVERWRITE_PR_TITLE}" ]]; then
+        echo -e "${OVERWRITE_PR_TITLE}" > "${TMP}/pr-title"
+    fi
+    if [[ "${EDIT_PR_TITLE}" =~ ^[1]$ ]]; then
         "${EDITOR:-vi}" "${TMP}/pr-title"
-    elif [[ -n "${EDIT_TITLE}" ]]; then
-        echo -e "${EDIT_TITLE}" > "${TMP}/pr-title"
     fi
     prtitle=$(cat "${TMP}/pr-title")
 
@@ -223,10 +228,11 @@ function make-a-pr() {
 Cherry pick of ${PULLSUBJ} on ${rel}.
 ${numandtitle}
 EOF
-    if [[ "${EDIT_BODY}" =~ ^[1]$ ]]; then
+    if [[ -z "${OVERWRITE_PR_BODY}" ]]; then
+        echo -e "${OVERWRITE_PR_BODY}" > "${TMP}/pr-body"
+    fi
+    if [[ "${EDIT_PR_BODY}" =~ ^[1]$ ]]; then
         "${EDITOR:-vi}" "${TMP}/pr-body"
-    elif [[ -n "${EDIT_BODY}" ]]; then
-        echo -e "${EDIT_BODY}" > "${TMP}/pr-body"
     fi
     prbody=$(cat "${TMP}/pr-body")
 
@@ -234,7 +240,7 @@ EOF
 }
 
 function confirm() {
-    if [[ -z "${ALLY}" ]]; then
+    if [[ "${SKIP_CONFIRM}" =~ ^[1]$ ]]; then
         read -p "+++ Proceed (anything but 'y' aborts the cherry-pick)? [y/n] " -r
         if ! [[ "${REPLY}" =~ ^[yY]$ ]]; then
             echo "Aborting." >&2
